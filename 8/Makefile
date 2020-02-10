@@ -7,6 +7,7 @@ export DOCKER_IMAGE_NAME ?= $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_BUILD_FLAGS =
 
 build: docker/build
+.PHONY: build
 
 ## update readme documents
 docs: readme/deps readme
@@ -14,6 +15,8 @@ docs: readme/deps readme
 
 run:
 	docker container run --rm --attach STDOUT ${DOCKER_IMAGE_NAME}
+.PHONY: run
 
 it:
 	docker run -it ${DOCKER_IMAGE_NAME} /bin/bash
+.PHONY: it
