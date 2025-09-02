@@ -1,12 +1,14 @@
 # if changing, make sure the deb command below is referencing the correct release like jammy
 # 22.04 is jammy
-FROM unionpos/ubuntu:22.04
+FROM unionpos/ubuntu:24.04
 
 # grab gosu for easy step-down from root
 COPY --from=unionpos/gosu:1.11 /gosu /usr/local/bin/
 
-ENV MYSQL_MAJOR 8.0
-ENV MYSQL_VERSION 8.4.37-1ubuntu22.04
+ENV MYSQL_MAJOR 8.4
+ENV MYSQL_VERSION 8.4.6-1ubuntu24.04
+
+
 
 # add our user and group first to make sure their IDs get assigned consistently, regardless of whatever dependencies get added
 RUN groupadd -r mysql && useradd -r -g mysql mysql
@@ -45,20 +47,14 @@ RUN set -ex \
 
 # Install required dependencies and add MySQL APT repository GPG key
 RUN apt-get update && \
+	apt upgrade -y && \
     apt-get install -y wget gnupg lsb-release && \
-    wget -qO - https://repo.mysql.com/RPM-GPG-KEY-mysql-2023 | gpg --dearmor -o /usr/share/keyrings/mysql.gpg
-
-# Add MySQL APT repository
-RUN echo "deb [signed-by=/usr/share/keyrings/mysql.gpg] http://repo.mysql.com/apt/ubuntu/ $(lsb_release -sc) mysql-8.0" > /etc/apt/sources.list.d/mysql.list
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.34-1_all.deb && \
+	dpkg -i mysql-apt-config_0.8.34-1_all.deb && \
+	apt-get update
 
 # Update the package list
-RUN { \
-	echo mysql-community-server mysql-community-server/data-dir select ''; \
-	echo mysql-community-server mysql-community-server/root-pass password ''; \
-	echo mysql-community-server mysql-community-server/re-root-pass password ''; \
-	echo mysql-community-server mysql-community-server/remove-test-db select false; \
-	} | debconf-set-selections \
-	&& apt-get update && apt-get install -y mysql-community-client="${MYSQL_VERSION}" mysql-community-server-core="${MYSQL_VERSION}"  \
+RUN apt-get update && apt-get install -y mysql-server  \
   && rm -rf /var/lib/apt/lists/* \
 	&& rm -rf /var/lib/mysql  \
   && mkdir -p /var/lib/mysql /var/run/mysqld \
