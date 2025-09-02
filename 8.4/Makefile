@@ -2,7 +2,7 @@
 
 export DOCKER_ORG ?= unionpos
 export DOCKER_IMAGE ?= $(DOCKER_ORG)/mysql
-export DOCKER_TAG ?= 8.0.37
+export DOCKER_TAG ?= 8.4.6
 export DOCKER_IMAGE_NAME = $(DOCKER_IMAGE):$(DOCKER_TAG)
 export DOCKER_BUILD_FLAGS =
 
